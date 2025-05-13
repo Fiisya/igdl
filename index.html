@@ -9,21 +9,13 @@
       --bg-light: #ffffff;
       --text-light: #222;
       --input-bg-light: #f0f0f0;
-
       --bg-dark: #121212;
       --text-dark: #ffffff;
       --input-bg-dark: #1e1e1e;
-
       --green: #00b14f;
       --green-hover: #00903d;
     }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
       background-color: var(--bg-light);
@@ -32,32 +24,26 @@
       min-height: 100vh;
       overflow-x: hidden;
     }
-
     body.dark {
       background-color: var(--bg-dark);
       color: var(--text-dark);
     }
-
     canvas#bgCanvas {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       z-index: -1;
     }
-
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 16px 24px;
     }
-
     .logo {
       font-weight: bold;
       font-size: 20px;
       color: var(--green);
     }
-
     .toggle-btn {
       background: none;
       border: 2px solid var(--green);
@@ -67,30 +53,19 @@
       font-weight: bold;
       cursor: pointer;
     }
-
     .container {
       max-width: 600px;
       margin: 50px auto;
       padding: 20px;
       text-align: center;
     }
-
-    h1 {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-
-    p {
-      margin-bottom: 20px;
-      font-size: 14px;
-    }
-
+    h1 { font-size: 22px; margin-bottom: 10px; }
+    p { margin-bottom: 20px; font-size: 14px; }
     .input-group {
       display: flex;
       gap: 10px;
       flex-direction: row;
     }
-
     input[type="text"] {
       flex: 1;
       padding: 12px;
@@ -100,12 +75,10 @@
       font-size: 14px;
       color: inherit;
     }
-
     body.dark input[type="text"] {
       background-color: var(--input-bg-dark);
       border: 1px solid #444;
     }
-
     .download {
       background-color: var(--green);
       color: white;
@@ -115,31 +88,23 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     .download:hover {
       background-color: var(--green-hover);
     }
-
-    #loading {
-      margin-top: 20px;
-    }
-
+    #loading { margin-top: 20px; }
     #result {
       margin-top: 30px;
       display: grid;
       gap: 20px;
     }
-
     .media-item {
       background: rgba(0, 0, 0, 0.05);
       padding: 12px;
       border-radius: 12px;
     }
-
     body.dark .media-item {
       background: rgba(255, 255, 255, 0.08);
     }
-
     video, img {
       width: 100%;
       max-height: 400px;
@@ -154,7 +119,6 @@
     <div class="logo">Instagram Downloader</div>
     <button class="toggle-btn" onclick="toggleDarkMode()">Dark Mode</button>
   </div>
-
   <div class="container">
     <h1>Instagram Downloader Free</h1>
     <p>Download Video, Foto, Reels, IGTV Insta online</p>
@@ -169,6 +133,7 @@
   </div>
 
   <script>
+    // Background Particle Animation
     const canvas = document.getElementById("bgCanvas");
     const ctx = canvas.getContext("2d");
     let particles = [];
@@ -188,15 +153,12 @@
         this.dx = (Math.random() - 0.5) * 0.8;
         this.dy = (Math.random() - 0.5) * 0.8;
       }
-
       update() {
         this.x += this.dx;
         this.y += this.dy;
-
         if (this.x < 0 || this.x > canvas.width) this.dx *= -1;
         if (this.y < 0 || this.y > canvas.height) this.dy *= -1;
       }
-
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
@@ -224,12 +186,14 @@
     initParticles(100);
     animateParticles();
 
+    // Dark Mode Toggle
     function toggleDarkMode() {
       document.body.classList.toggle("dark");
       const toggleBtn = document.querySelector(".toggle-btn");
       toggleBtn.textContent = document.body.classList.contains("dark") ? "Light Mode" : "Dark Mode";
     }
 
+    // Download Handler
     async function download() {
       const url = document.getElementById("urlInput").value.trim();
       const loading = document.getElementById("loading");
@@ -247,28 +211,33 @@
         const data = await res.json();
         loading.style.display = "none";
 
-        if (data.status === 200 && data.result.data?.length) {
+        if (data.status === 200 && data.result.status && data.result.data?.length) {
           data.result.data.forEach((media, i) => {
             const div = document.createElement("div");
             div.className = "media-item";
 
-            if (media.url.includes(".mp4")) {
-              const vid = document.createElement("video");
-              vid.src = media.url;
-              vid.controls = true;
-              div.appendChild(vid);
-            } else {
+            if (media.thumbnail) {
               const img = document.createElement("img");
-              img.src = media.url;
+              img.src = media.thumbnail;
+              img.alt = "Thumbnail";
               div.appendChild(img);
             }
 
-            const btn = document.createElement("a");
-            btn.href = media.url;
-            btn.download = `ig_media_${i + 1}`;
-            btn.textContent = "Download";
-            btn.className = "download";
-            div.appendChild(btn);
+            if (media.url?.includes(".mp4")) {
+              const video = document.createElement("video");
+              video.src = media.url;
+              video.controls = true;
+              div.appendChild(video);
+            }
+
+            if (media.url) {
+              const btn = document.createElement("a");
+              btn.href = media.url;
+              btn.download = `ig_media_${i + 1}`;
+              btn.textContent = "Download";
+              btn.className = "download";
+              div.appendChild(btn);
+            }
 
             result.appendChild(div);
           });
