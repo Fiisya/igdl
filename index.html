@@ -195,60 +195,63 @@
 
     // Download Handler
     async function download() {
-      const url = document.getElementById("urlInput").value.trim();
-      const loading = document.getElementById("loading");
-      const result = document.getElementById("result");
-      result.innerHTML = "";
+  const url = document.getElementById("urlInput").value.trim();
+  const loading = document.getElementById("loading");
+  const result = document.getElementById("result");
+  result.innerHTML = ""; // Bersihkan hasil sebelumnya
 
-      if (!url.includes("instagram.com")) {
-        alert("Masukkan URL Instagram yang valid!");
-        return;
-      }
+  if (!url.includes("instagram.com")) {
+    alert("Masukkan URL Instagram yang valid!");
+    return;
+  }
 
-      loading.style.display = "block";
-      try {
-        const res = await fetch(`https://fastrestapis.fasturl.cloud/downup/igdown/simple?url=${encodeURIComponent(url)}`);
-        const data = await res.json();
-        loading.style.display = "none";
+  loading.style.display = "block";
+  try {
+    // 1. Ganti URL API sesuai permintaan Anda
+    const apiUrl = `https://api.platform.web.id/instagram?url=${encodeURIComponent(url)}`;
+    const res = await fetch(apiUrl);
+    const data = await res.json();
+    loading.style.display = "none";
 
-        if (data.status === 200 && data.result.status && data.result.data?.length) {
-          data.result.data.forEach((media, i) => {
-            const div = document.createElement("div");
-            div.className = "media-item";
+    // 2. Sesuaikan kondisi pengecekan data
+    if (data.status && data.result?.length) {
+      // 3. Loop melalui array data.result
+      data.result.forEach((media, i) => {
+        const div = document.createElement("div");
+        div.className = "media-item";
 
-            if (media.thumbnail) {
-              const img = document.createElement("img");
-              img.src = media.thumbnail;
-              img.alt = "Thumbnail";
-              div.appendChild(img);
-            }
-
-            if (media.url?.includes(".mp4")) {
-              const video = document.createElement("video");
-              video.src = media.url;
-              video.controls = true;
-              div.appendChild(video);
-            }
-
-            if (media.url) {
-              const btn = document.createElement("a");
-              btn.href = media.url;
-              btn.download = `ig_media_${i + 1}`;
-              btn.textContent = "Download";
-              btn.className = "download";
-              div.appendChild(btn);
-            }
-
-            result.appendChild(div);
-          });
-        } else {
-          result.innerHTML = `<p style="color:red;">Gagal mengambil media.</p>`;
+        // Gunakan key "thumbnail"
+        if (media.thumbnail) {
+          const img = document.createElement("img");
+          img.src = media.thumbnail;
+          img.alt = "Thumbnail";
+          div.appendChild(img);
         }
-      } catch (e) {
-        loading.style.display = "none";
-        result.innerHTML = `<p style="color:red;">Terjadi kesalahan.</p>`;
-      }
+
+        // Tidak ada elemen video terpisah, jadi kita tampilkan thumbnail dan tombol download saja.
+
+        // 4. Gunakan key "url_download" untuk link
+        if (media.url_download) {
+          const btn = document.createElement("a");
+          btn.href = media.url_download;
+          btn.download = `instagram_media_${i + 1}.mp4`; // Nama file saat di-download
+          // Gunakan key "kualitas" untuk teks tombol
+          btn.textContent = media.kualitas || "Download";
+          btn.className = "download";
+          div.appendChild(btn);
+        }
+
+        result.appendChild(div);
+      });
+    } else {
+      result.innerHTML = `<p style="color:red;">Gagal mengambil media atau tidak ada hasil.</p>`;
     }
+  } catch (e) {
+    loading.style.display = "none";
+    result.innerHTML = `<p style="color:red;">Terjadi kesalahan: ${e.message}</p>`;
+    console.error(e); // Tampilkan error di console untuk debug
+  }
+}
   </script>
 </body>
 </html>
